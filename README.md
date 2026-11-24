@@ -1,73 +1,36 @@
 # ◈ Pixelbase
 
-**A lightweight, browser-based image-to-Base64 converter.**
+**A simple, lightweight image-to-Base64 converter that runs entirely in your browser.**
 
-Pixelbase converts images into Base64 strings and Data URLs, with support for file uploads, clipboard pasting, and online image URLs. Everything runs directly in your browser — no backend or account required.
+Pixelbase lets you convert images into Base64 strings, Data URLs, and Markdown image syntax. Upload an image, paste one from your clipboard, or provide an online image URL.
+
+<p align="center">
+  <a href="https://lavanthara.github.io/pixelbase/">
+    <strong>🌐 Visit Pixelbase</strong>
+  </a>
+</p>
 
 ## ✨ Features
 
-- **File Upload** — Select images from your device.
-- **Drag & Drop** — Drop images directly into the application.
-- **Clipboard Support** — Paste copied images and screenshots using `Ctrl + V` or `⌘ + V`.
-- **Image URLs** — Convert images directly from online URLs.
-- **Live Preview** — Preview your image after conversion.
+- **Image Upload** — Select images directly from your device.
+- **Drag & Drop** — Drop images into the upload area.
+- **Clipboard Pasting** — Paste copied images and screenshots using `Ctrl + V` or `⌘ + V`.
+- **Online Image URLs** — Convert images directly from the internet.
+- **Live Preview** — See your image before using the output.
 - **Multiple Output Formats:**
   - Data URL (`data:image/...;base64,...`)
   - Raw Base64
   - Markdown Image (`![alt](data:image/...)`)
-- **Copy to Clipboard** — Copy generated output instantly.
-- **Download** — Save the generated Base64 as a `.txt` file.
+- **Copy to Clipboard** — Copy the generated output instantly.
+- **Download as TXT** — Save the generated output as a text file.
 - **Privacy-Friendly** — Images are processed locally in your browser.
 
-## 🚀 Getting Started
+## 🚀 Usage
 
-Pixelbase is a static website. No installation, dependencies, or build tools are required.
-
-### Run Locally
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/lavanthara/pixelbase.git
-   ```
-
-2. Enter the project directory:
-
-   ```bash
-   cd pixelbase
-   ```
-
-3. Open `pixelbase.html` in your browser.
-
-Alternatively, rename it to `index.html` and serve it using any static web server.
-
-## 🌐 Deployment
-
-Pixelbase can be hosted for free using **GitHub Pages**:
-
-1. Push the project to a GitHub repository.
-2. Rename `pixelbase.html` to `index.html`.
-3. Open your repository's **Settings → Pages**.
-4. Select your deployment branch and root directory.
-5. Save your settings.
-
-Your website will be available through your GitHub Pages URL.
-
-## ⚠️ Notes & Limitations
-
-- Online image URLs must allow cross-origin requests (CORS). Some image hosts block browser access.
-- Base64 encoding increases image size by approximately 33%.
-- Some Markdown platforms, including GitHub, restrict embedded Base64 images in Markdown.
-- Large images may consume significant browser memory.
-
-## 🔒 Privacy
-
-Pixelbase does not have a backend.
-
-- Local files are processed entirely in your browser.
-- Pasted images are processed locally.
-- Online images are fetched directly from their respective hosts.
-- No images are uploaded to a Pixelbase server.
+1. Visit [Pixelbase](https://lavanthara.github.io/pixelbase/).
+2. Upload an image, paste one, or enter an image URL.
+3. Choose your preferred output format.
+4. Copy the generated result or download it as a `.txt` file.
 
 ## 🛠️ Built With
 
@@ -78,8 +41,30 @@ Pixelbase does not have a backend.
 - Clipboard API
 - Fetch API
 
+No frameworks, dependencies, or backend required.
+
+## 🔒 Privacy
+
+Pixelbase is a fully static website.
+
+- Uploaded images never leave your browser.
+- Pasted images are processed locally.
+- Online images are fetched directly from their respective hosts.
+- No Pixelbase backend or image storage is involved.
+
+## ⚠️ Limitations
+
+- Online image hosts must allow CORS requests.
+- Base64 increases the original image size by approximately 33%.
+- Some Markdown platforms, including GitHub, restrict embedded Base64 images.
+- Very large images may consume considerable browser memory.
+
+## 📄 License
+
+Distributed under the [MIT License](LICENSE).
+
 ---
 
 <p align="center">
-  Made with simplicity in mind.
+  Made with simplicity in mind. ◈
 </p>
