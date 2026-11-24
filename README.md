@@ -5,7 +5,7 @@
 Pixelbase lets you convert images into Base64 strings, Data URLs, and Markdown image syntax. Upload an image, paste one from your clipboard, or provide an online image URL.
 
 <p align="center">
-  <a href="https://lavanthara.github.io/pixelbase/">
+  <a href="https://lavanthara.github.io/Pixelbase/">
     <strong>🌐 Visit Pixelbase</strong>
   </a>
 </p>
