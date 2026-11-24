@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Pixelbase — Image to Base64</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0c12;
+      --panel: #12141e;
+      --panel-2: #191c29;
+      --line: #292d3d;
+      --text: #f1f2f8;
+      --muted: #9298ad;
+      --accent: #a78bfa;
+      --accent-2: #7c5ce7;
+      --good: #69d6ae;
+      --danger: #ff858f;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text);
+      background: radial-gradient(ellipse at 50% -20%, #282044 0, transparent 48%), var(--bg);
+    }
+    button, input, textarea { font: inherit; }
+    .shell { width: min(960px, calc(100% - 36px)); margin: 0 auto; padding: 54px 0 64px; }
+    header { text-align: center; margin-bottom: 34px; }
+    .mark {
+      width: 46px; height: 46px; display: grid; place-items: center; margin: 0 auto 17px;
+      border: 1px solid #59478d; border-radius: 15px; color: #d7c9ff;
+      background: linear-gradient(145deg, #30234f, #171523); font-size: 22px;
+      box-shadow: 0 10px 35px #0005;
+    }
+    h1 { margin: 0; font-size: clamp(30px, 5vw, 43px); letter-spacing: -1.8px; font-weight: 750; }
+    .sub { color: var(--muted); margin: 10px 0 0; font-size: 15px; }
+    .panel {
+      border: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 94%, transparent);
+      border-radius: 20px; padding: 22px; box-shadow: 0 22px 70px #0003;
+    }
+    .tabs { display: flex; gap: 7px; padding: 5px; width: fit-content; border: 1px solid var(--line); background: #0d0f17; border-radius: 12px; margin-bottom: 20px; }
+    .tab { border: 0; border-radius: 8px; padding: 9px 15px; color: var(--muted); background: transparent; cursor: pointer; }
+    .tab.active { color: white; background: #29213f; box-shadow: inset 0 0 0 1px #574483; }
+    .drop {
+      min-height: 218px; border: 1.5px dashed #45445e; border-radius: 15px; background: #10121b;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+      padding: 25px; transition: .18s ease; cursor: pointer;
+    }
+    .drop.drag { border-color: var(--accent); background: #1b1730; }
+    .upload-icon { font-size: 30px; color: #c5b3ff; margin-bottom: 12px; }
+    .drop strong { font-size: 16px; }
+    .drop p { margin: 7px 0 15px; color: var(--muted); font-size: 13px; }
+    .primary, .secondary {
+      border: 1px solid transparent; border-radius: 10px; padding: 10px 15px; cursor: pointer;
+      transition: .15s ease; font-weight: 650; font-size: 13px;
+    }
+    .primary { background: var(--accent); color: #171022; }
+    .primary:hover { background: #b9a5ff; transform: translateY(-1px); }
+    .secondary { background: #202333; color: var(--text); border-color: #34394c; }
+    .secondary:hover { background: #292e42; }
+    .url-row { display: flex; gap: 9px; }
+    input[type="url"] {
+      width: 100%; min-width: 0; background: #0e1018; color: var(--text); border: 1px solid #34384a;
+      border-radius: 10px; padding: 12px 13px; outline: none;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #a78bfa20; }
+    .hint { color: var(--muted); font-size: 12px; line-height: 1.5; margin: 11px 1px 0; }
+    .status { min-height: 21px; margin: 13px 1px 0; font-size: 13px; color: var(--muted); }
+    .status.error { color: var(--danger); } .status.success { color: var(--good); }
+    .result { display: none; margin-top: 20px; }
+    .result.show { display: block; }
+    .result-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 13px; }
+    .result-head h2 { margin: 0; font-size: 16px; }
+    .meta { color: var(--muted); font-size: 12px; margin-top: 5px; }
+    .result-grid { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 16px; }
+    .preview {
+      min-height: 150px; border: 1px solid var(--line); border-radius: 12px; background:
+        linear-gradient(45deg,#1b1d29 25%,transparent 25%),linear-gradient(-45deg,#1b1d29 25%,transparent 25%),
+        linear-gradient(45deg,transparent 75%,#1b1d29 75%),linear-gradient(-45deg,transparent 75%,#1b1d29 75%),#12141e;
+      background-size: 18px 18px; background-position: 0 0,0 9px,9px -9px,-9px 0;
+      display: grid; place-items: center; overflow: hidden;
+    }
+    .preview img { max-width: 100%; max-height: 220px; object-fit: contain; }
+    .output-wrap { min-width: 0; }
+    .output-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
+    .output-top label { color: var(--muted); font-size: 12px; }
+    select { color: var(--text); background: #202333; border: 1px solid #34394c; border-radius: 8px; padding: 7px 9px; }
+    textarea {
+      width: 100%; height: 151px; resize: vertical; background: #0d0f17; color: #d8d5e7;
+      border: 1px solid #303447; border-radius: 10px; padding: 12px; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+      outline: none; overflow-wrap: anywhere;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .privacy { display: flex; gap: 9px; align-items: flex-start; color: var(--muted); font-size: 12px; line-height: 1.55; margin: 18px 2px 0; }
+    .privacy span { color: var(--good); }
+    footer { text-align: center; color: #6f7488; font-size: 12px; margin-top: 24px; }
+    @media (max-width: 620px) {
+      .shell { padding-top: 35px; }
+      .panel { padding: 15px; }
+      .result-grid { grid-template-columns: 1fr; }
+      .preview { min-height: 170px; }
+      .url-row { flex-direction: column; }
+      .url-row button { width: 100%; }
+      .result-head { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="mark">◈</div>
+      <h1>Pixelbase</h1>
+      <p class="sub">Turn any image into a Base64 data URL. Fast, simple, and private.</p>
+    </header>
+
+    <section class="panel">
+      <div class="tabs" role="tablist" aria-label="Image source">
+        <button class="tab active" id="fileTab" role="tab" aria-selected="true">Upload image</button>
+        <button class="tab" id="urlTab" role="tab" aria-selected="false">Image URL</button>
+      </div>
+
+      <div id="filePanel">
+        <label class="drop" id="dropZone" for="fileInput">
+          <div class="upload-icon">↥</div>
+          <strong>Drop an image here</strong>
+          <p>or choose a file, drag it here, or paste an image with Ctrl/⌘ + V</p>
+          <span class="primary">Choose image</span>
+          <input id="fileInput" type="file" accept="image/*" hidden>
+        </label>
+        <p class="hint">Supports common browser image formats, including PNG, JPEG, WebP, GIF, SVG, and AVIF where supported.</p>
+      </div>
+
+      <div id="urlPanel" hidden>
+        <form id="urlForm">
+          <div class="url-row">
+            <input id="imageUrl" type="url" placeholder="https://example.com/image.png" autocomplete="url" required>
+            <button class="primary" type="submit" id="urlButton">Convert URL</button>
+          </div>
+        </form>
+        <p class="hint">The image host must allow cross-origin requests (CORS). If it blocks browser access, download the image and use the upload tab instead.</p>
+      </div>
+
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+
+      <section class="result" id="result">
+        <div class="result-head">
+          <div>
+            <h2>Converted image</h2>
+            <div class="meta" id="fileMeta"></div>
+          </div>
+          <button class="secondary" id="clearButton" type="button">Clear</button>
+        </div>
+        <div class="result-grid">
+          <div class="preview"><img id="previewImage" alt="Preview of converted image"></div>
+          <div class="output-wrap">
+            <div class="output-top">
+              <label for="output">Output format</label>
+              <select id="format">
+                <option value="data">Data URL (with MIME type)</option>
+                <option value="raw">Raw Base64 only</option>
+                <option value="markdown">Markdown image</option>
+              </select>
+            </div>
+            <textarea id="output" readonly spellcheck="false" aria-label="Base64 output"></textarea>
+            <p class="hint" id="formatHint">Data URL can be used directly in HTML and CSS.</p>
+            <div class="actions">
+              <button class="primary" id="copyButton" type="button">Copy Base64</button>
+              <button class="secondary" id="downloadButton" type="button">Download .txt</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="privacy"><span>●</span><div><strong>Private by design.</strong> Uploaded files are read locally in your browser. URL conversion fetches the image directly from its host; this page does not send images to its own server.</div></div>
+    </section>
+    <footer>Pixelbase · A lightweight, browser-only utility</footer>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let currentDataUrl = "";
+    let currentName = "image";
+
+    function setStatus(message, type = "") {
+      $("status").textContent = message;
+      $("status").className = "status" + (type ? " " + type : "");
+    }
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + " B";
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+      return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+    }
+
+    function showResult(dataUrl, name, originalSize) {
+      if (!dataUrl.startsWith("data:image/")) {
+        throw new Error("That does not appear to be a supported image.");
+      }
+      currentDataUrl = dataUrl;
+      currentName = (name || "image").replace(/\.[^.]+$/, "") || "image";
+      $("previewImage").src = dataUrl;
+      $("fileMeta").textContent =
+        `${name || "Image"} · ${formatBytes(originalSize)} original · ${formatBytes(dataUrl.length)} encoded`;
+      $("result").classList.add("show");
+      updateOutput();
+      setStatus("Image converted successfully.", "success");
+    }
+
+    function updateOutput() {
+      const raw = currentDataUrl.split(",")[1] || "";
+      const format = $("format").value;
+      if (format === "raw") {
+        $("output").value = raw;
+      } else if (format === "markdown") {
+        const alt = currentName.replace(/[\\[\\]\\\\]/g, " ").trim() || "image";
+        $("output").value = `![${alt}](${currentDataUrl})`;
+      } else {
+        $("output").value = currentDataUrl;
+      }
+    }
+
+    function convertFile(file) {
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        setStatus("Please choose a valid image file.", "error");
+        return;
+      }
+      setStatus("Converting image…");
+      const reader = new FileReader();
+      reader.onload = () => {
+        try { showResult(reader.result, file.name, file.size); }
+        catch (error) { setStatus(error.message, "error"); }
+      };
+      reader.onerror = () => setStatus("The browser could not read this file.", "error");
+      reader.readAsDataURL(file);
+    }
+
+    async function convertUrl(url) {
+      let parsed;
+      try { parsed = new URL(url); }
+      catch { setStatus("Enter a valid image URL.", "error"); return; }
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        setStatus("Only HTTP and HTTPS image links are supported.", "error");
+        return;
+      }
+      $("urlButton").disabled = true;
+      $("urlButton").textContent = "Fetching…";
+      setStatus("Fetching image from its host…");
+      try {
+        const response = await fetch(parsed.href, { mode: "cors" });
+        if (!response.ok) throw new Error(`The image host returned HTTP ${response.status}.`);
+        const blob = await response.blob();
+        if (!blob.type.startsWith("image/")) throw new Error("The URL did not return an image.");
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const lastPart = parsed.pathname.split("/").filter(Boolean).pop() || "online-image";
+            showResult(reader.result, lastPart, blob.size);
+          } catch (error) { setStatus(error.message, "error"); }
+          finally { $("urlButton").disabled = false; $("urlButton").textContent = "Convert URL"; }
+        };
+        reader.onerror = () => {
+          setStatus("The browser could not read the downloaded image.", "error");
+          $("urlButton").disabled = false; $("urlButton").textContent = "Convert URL";
+        };
+        reader.readAsDataURL(blob);
+      } catch (error) {
+        const cors = error instanceof TypeError;
+        setStatus(cors
+          ? "Could not access that image. The host may block CORS; try downloading it and uploading the file instead."
+          : error.message, "error");
+        $("urlButton").disabled = false;
+        $("urlButton").textContent = "Convert URL";
+      }
+    }
+
+    $("fileTab").addEventListener("click", () => {
+      $("fileTab").classList.add("active"); $("urlTab").classList.remove("active");
+      $("fileTab").setAttribute("aria-selected", "true"); $("urlTab").setAttribute("aria-selected", "false");
+      $("filePanel").hidden = false; $("urlPanel").hidden = true; setStatus("");
+    });
+    $("urlTab").addEventListener("click", () => {
+      $("urlTab").classList.add("active"); $("fileTab").classList.remove("active");
+      $("urlTab").setAttribute("aria-selected", "true"); $("fileTab").setAttribute("aria-selected", "false");
+      $("urlPanel").hidden = false; $("filePanel").hidden = true; setStatus("");
+    });
+    $("fileInput").addEventListener("change", (event) => convertFile(event.target.files[0]));
+
+    // Accept image data copied from screenshots, browsers, and image editors.
+    document.addEventListener("paste", (event) => {
+      const items = [...(event.clipboardData?.items || [])];
+      const imageItem = items.find(item => item.type.startsWith("image/"));
+      if (!imageItem) return;
+
+      const file = imageItem.getAsFile();
+      if (file) {
+        event.preventDefault();
+        const extension = file.type.split("/")[1]?.replace("jpeg", "jpg") || "png";
+        const pastedImage = new File(
+          [file],
+          `pasted-image.${extension}`,
+          { type: file.type, lastModified: Date.now() }
+        );
+        $("fileTab").click();
+        convertFile(pastedImage);
+      }
+    });
+    $("urlForm").addEventListener("submit", (event) => {
+      event.preventDefault(); convertUrl($("imageUrl").value.trim());
+    });
+    $("format").addEventListener("change", () => {
+      updateOutput();
+      $("formatHint").textContent = $("format").value === "markdown"
+        ? "Creates ![alt](data:image/...) syntax. Some Markdown platforms, including GitHub, block embedded data URLs."
+        : $("format").value === "raw"
+          ? "Raw Base64 contains only the encoded image data."
+          : "Data URL can be used directly in HTML and CSS.";
+    });
+    $("copyButton").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText($("output").value);
+        setStatus("Copied to clipboard.", "success");
+      } catch {
+        $("output").select();
+        setStatus("Clipboard access was blocked. Select the text and copy it manually.", "error");
+      }
+    });
+    $("downloadButton").addEventListener("click", () => {
+      const blob = new Blob([$("output").value], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      const objectUrl = URL.createObjectURL(blob);
+      link.href = objectUrl; link.download = currentName + "-base64.txt";
+      link.click(); URL.revokeObjectURL(objectUrl);
+    });
+    $("clearButton").addEventListener("click", () => {
+      $("result").classList.remove("show"); $("previewImage").removeAttribute("src");
+      $("fileInput").value = ""; $("imageUrl").value = ""; currentDataUrl = "";
+      setStatus("");
+    });
+
+    const dropZone = $("dropZone");
+    ["dragenter", "dragover"].forEach(type => dropZone.addEventListener(type, event => {
+      event.preventDefault(); dropZone.classList.add("drag");
+    }));
+    ["dragleave", "drop"].forEach(type => dropZone.addEventListener(type, event => {
+      event.preventDefault(); dropZone.classList.remove("drag");
+    }));
+    dropZone.addEventListener("drop", event => {
+      const file = [...event.dataTransfer.files].find(item => item.type.startsWith("image/"));
+      if (file) convertFile(file); else setStatus("Drop an image file to convert it.", "error");
+    });
+  </script>
+</body>
+</html>
